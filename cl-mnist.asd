@@ -2,9 +2,11 @@
 (in-package :asdf)
 (defsystem "cl-mnist"
   :version
-  "0.0.0"
+  "0.1.0"
   :depends-on
-  nil
+  (
+   "dexador" ; http client.
+   )
   :pathname
   "src/"
   :components
