@@ -27,3 +27,17 @@
                      (format nil "~A~A" +dataset-directory+ file)
                      :if-exists :supersede)
         :collect pathname))
+
+(defun extract (gzip-pathname &optional (extract t))
+  (let ((pathname
+         (car (uiop:split-string gzip-pathname :separator "." :max 2))))
+    (when extract
+      (with-open-file (out pathname :direction :output
+                       :element-type '(unsigned-byte 8)
+                       :if-exists :supersede
+                       :if-does-not-exist :create)
+        (chipz:decompress out :gzip gzip-pathname)))
+    pathname))
+
+(defun extracts (pathnames &optional (extract t))
+  (mapcar (lambda (x) (extract x extract)) pathnames))

@@ -2,10 +2,12 @@
 (in-package :asdf)
 (defsystem "cl-mnist"
   :version
-  "0.1.0"
+  "0.2.0"
   :depends-on
   (
    "dexador" ; http client.
+   "chipz" ; Decompression gzip.
+   "uiop" ; Utilities.
    )
   :pathname
   "src/"
