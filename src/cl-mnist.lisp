@@ -57,7 +57,9 @@
                   result (make-array size :element-type '(unsigned-byte 8)))
             (assert (= size (fast-io:fast-read-sequence result buff)))
             (with-open-file (out (make-pathname :type "lisp"
-                                                :defaults pathname))
+                                                :defaults pathname)
+                             :if-exists :supersede
+                             :if-does-not-exist :create)
               (with-standard-io-syntax (print result out)))))
         (with-open-file (in (make-pathname :type "lisp" :defaults pathname))
           (with-standard-io-syntax
@@ -86,7 +88,9 @@
             (assert (= size (fast-io:fast-read-sequence result buff)))
             (with-standard-io-syntax
              (with-open-file (out (make-pathname :type "lisp"
-                                                 :defaults pathname))
+                                                 :defaults pathname)
+                              :if-exists :supersede
+                              :if-does-not-exist :create)
                (print items out)
                (print row out)
                (print col out)
