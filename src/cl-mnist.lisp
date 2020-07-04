@@ -20,12 +20,13 @@
                                     (asdf:find-system :cl-mnist)))
                                 '("dataset")))))
 
-(defun fetch (&optional (fetcher #'dex:fetch))
+(defun mnist-files (&optional force (fetcher #'dex:fetch))
   (loop :for file :in +mnist-files+
         :for pathname := (format nil "~A~A" +dataset-directory+ file)
-        :do (funcall fetcher (format nil "~A~A" +mnist-base+ file)
-                     (format nil "~A~A" +dataset-directory+ file)
-                     :if-exists :supersede)
+        :if (or force (not (probe-file pathname)))
+          :do (funcall fetcher (format nil "~A~A" +mnist-base+ file)
+                       (format nil "~A~A" +dataset-directory+ file)
+                       :if-exists :supersede)
         :collect pathname))
 
 (defun extract (gzip-pathname &optional (extract t))
