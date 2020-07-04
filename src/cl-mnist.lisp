@@ -42,14 +42,17 @@
 (defun extracts (pathnames &optional (extract t))
   (mapcar (lambda (x) (extract x extract)) pathnames))
 
-(defun load-labels (pathname)
+(defun load-labels (pathname &key one-hot)
   (with-open-file (in pathname :element-type '(unsigned-byte 8))
     (fast-io:with-fast-input (buff nil in)
       (fast-io:read32-be buff) ; Discard magic number.
       (let* ((size (fast-io:read32-be buff))
              (result (make-array size :element-type '(unsigned-byte 8))))
         (assert (= size (fast-io:fast-read-sequence result buff)))
-        result))))
+        (if one-hot
+            (let ((array (make-array (list size 10) :element-type 'bit)))
+              (dotimes (x size array) (setf (aref array x (aref result x)) 1)))
+            result)))))
 
 (defun load-images (pathname &key normalize flatten)
   (with-open-file (in pathname :element-type '(unsigned-byte 8))
