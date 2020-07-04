@@ -41,3 +41,12 @@
 
 (defun extracts (pathnames &optional (extract t))
   (mapcar (lambda (x) (extract x extract)) pathnames))
+
+(defun load-labels (pathname)
+  (with-open-file (in pathname :element-type '(unsigned-byte 8))
+    (fast-io:with-fast-input (buff nil in)
+      (fast-io:read32-be buff) ; Discard magic number.
+      (let* ((size (fast-io:read32-be buff))
+             (result (make-array size :element-type '(unsigned-byte 8))))
+        (assert (= size (fast-io:fast-read-sequence result buff)))
+        result))))
