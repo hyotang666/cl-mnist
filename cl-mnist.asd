@@ -1,6 +1,9 @@
 ; vim: ft=lisp et
 (in-package :asdf)
 (defsystem "cl-mnist"
+  :author "SATO shinichi"
+  :license "MIT"
+  :description "MNIST dataset preprocessor for Common Lisp."
   :version
   "1.0.0"
   :depends-on
