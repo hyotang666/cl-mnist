@@ -81,3 +81,23 @@
                         (list row col)))
               :displaced-to result
               :element-type '(unsigned-byte 8)))))))
+
+(defun load-mnist (&key force normalize flatten one-hot-label)
+  "Return plist as :train-labels :test-labels :train-images :test-images."
+  (mapcan
+    (lambda (pathname)
+      (cond
+       ((search "labels" (namestring pathname))
+        (list
+          (if (uiop:string-prefix-p "train" (namestring pathname))
+              :train-labels
+              :test-labels)
+          (load-labels pathname :one-hot one-hot-label)))
+       ((search "images" (namestring pathname))
+        (list
+          (if (uiop:string-prefix-p "train" (namestring pathname))
+              :train-images
+              :test-images)
+          (load-images pathname :normalize normalize :flatten flatten)))
+       (t (error "Unknown file name: ~S" pathname))))
+    (extracts (mnist-files force))))
