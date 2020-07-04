@@ -58,6 +58,7 @@
             (assert (= size (fast-io:fast-read-sequence result buff)))
             (with-open-file (out (make-pathname :type "lisp"
                                                 :defaults pathname)
+                             :direction :output
                              :if-exists :supersede
                              :if-does-not-exist :create)
               (with-standard-io-syntax (print result out)))))
@@ -89,6 +90,7 @@
             (with-standard-io-syntax
              (with-open-file (out (make-pathname :type "lisp"
                                                  :defaults pathname)
+                              :direction :output
                               :if-exists :supersede
                               :if-does-not-exist :create)
                (print items out)
