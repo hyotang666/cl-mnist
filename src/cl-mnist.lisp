@@ -33,11 +33,12 @@
   (let ((pathname
          (car (uiop:split-string gzip-pathname :separator "." :max 2))))
     (when extract
-      (with-open-file (out pathname :direction :output
-                       :element-type '(unsigned-byte 8)
-                       :if-exists :supersede
-                       :if-does-not-exist :create)
-        (chipz:decompress out :gzip gzip-pathname)))
+      (with-open-file (in gzip-pathname :element-type '(unsigned-byte 8))
+        (with-open-file (out pathname :direction :output
+                         :element-type '(unsigned-byte 8)
+                         :if-exists :supersede
+                         :if-does-not-exist :create)
+          (chipz:decompress out :gzip in))))
     pathname))
 
 (defun extracts (pathnames &optional (extract t))
