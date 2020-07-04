@@ -50,3 +50,30 @@
              (result (make-array size :element-type '(unsigned-byte 8))))
         (assert (= size (fast-io:fast-read-sequence result buff)))
         result))))
+
+(defun load-images (pathname &key normalize flatten)
+  (with-open-file (in pathname :element-type '(unsigned-byte 8))
+    (fast-io:with-fast-input (buff nil in)
+      (fast-io:read32-be buff) ; Discard magic number.
+      (let* ((items (fast-io:read32-be buff))
+             (row (fast-io:read32-be buff))
+             (col (fast-io:read32-be buff))
+             (size (* row col items))
+             (result (make-array size :element-type '(unsigned-byte 8))))
+        (assert (= size (fast-io:fast-read-sequence result buff)))
+        (if normalize
+            (make-array
+              (cons items
+                    (if flatten
+                        (list (* row col))
+                        (list row col)))
+              :element-type *read-default-float-format*
+              :displaced-to (map `(array ,*read-default-float-format* (*))
+                                 (lambda (x) (/ x 255.0)) result))
+            (make-array
+              (cons items
+                    (if flatten
+                        (list (* row col))
+                        (list row col)))
+              :displaced-to result
+              :element-type '(unsigned-byte 8)))))))
