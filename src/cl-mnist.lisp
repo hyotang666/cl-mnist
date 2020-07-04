@@ -2,7 +2,7 @@
 
 (defpackage :cl-mnist
   (:use :cl)
-  (:export))
+  (:export #:load-mnist))
 
 (in-package :cl-mnist)
 

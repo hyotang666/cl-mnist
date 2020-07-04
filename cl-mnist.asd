@@ -2,7 +2,7 @@
 (in-package :asdf)
 (defsystem "cl-mnist"
   :version
-  "0.6.6"
+  "1.0.0"
   :depends-on
   (
    "dexador" ; http client.
