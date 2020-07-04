@@ -122,6 +122,13 @@
           :displaced-to result
           :element-type '(unsigned-byte 8)))))
 
+(declaim
+ (ftype (function
+         (&key (:force boolean) (:normalize boolean) (:flatten boolean)
+          (:one-hot-label boolean))
+         cons)
+        load-mnist))
+
 (defun load-mnist (&key force normalize flatten one-hot-label)
   "Return plist as :train-labels :test-labels :train-images :test-images."
   (mapcan
