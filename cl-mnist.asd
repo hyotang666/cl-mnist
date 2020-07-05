@@ -5,7 +5,7 @@
   :license "MIT"
   :description "MNIST dataset preprocessor for Common Lisp."
   :version
-  "1.0.0"
+  "1.0.1"
   :depends-on
   (
    "dexador" ; http client.

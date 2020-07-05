@@ -134,15 +134,15 @@
   (mapcan
     (lambda (pathname)
       (cond
-       ((search "labels" (namestring pathname))
+       ((search "labels" (pathname-name pathname))
         (list
-          (if (uiop:string-prefix-p "train" (namestring pathname))
+          (if (uiop:string-prefix-p "train" (pathname-name pathname))
               :train-labels
               :test-labels)
           (load-labels pathname :one-hot one-hot-label)))
-       ((search "images" (namestring pathname))
+       ((search "images" (pathname-name pathname))
         (list
-          (if (uiop:string-prefix-p "train" (namestring pathname))
+          (if (uiop:string-prefix-p "train" (pathname-name pathname))
               :train-images
               :test-images)
           (load-images pathname :normalize normalize :flatten flatten)))
