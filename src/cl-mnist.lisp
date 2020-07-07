@@ -72,6 +72,18 @@
           (dotimes (x size array) (setf (aref array x (aref result x)) 1)))
         result)))
 
+(defun label-slurper (pathname &key one-hot)
+  (let ((stream (open pathname :element-type '(unsigned-byte 8))))
+    ;; Skip magic number and label number.
+    (assert (file-position stream 8))
+    (slurp:make-slurper stream
+                        (if one-hot
+                            (lambda (stream)
+                              (let ((vector (make-array 10 :element-type 'bit)))
+                                (setf (aref vector (read-byte stream)) 1)
+                                vector))
+                            'read-byte))))
+
 (defun load-images (pathname &key normalize flatten force)
   (let (result size items row col)
     ;; Loading...
@@ -122,14 +134,49 @@
           :displaced-to result
           :element-type '(unsigned-byte 8)))))
 
+(defun image-slurper (pathname &key normalize flatten)
+  (let* ((stream (open pathname :element-type '(unsigned-byte 8)))
+         (row
+          (progn ; Skip magic number and number of images.
+           (assert (file-position stream 8))
+           (nibbles:read-ub32/be stream)))
+         (col (nibbles:read-ub32/be stream))
+         (size (* row col)))
+    (labels ((slurper (key)
+               (lambda (stream)
+                 (let ((vector
+                        (make-array size :element-type '(unsigned-byte 8))))
+                   (assert (= size (read-sequence vector stream)))
+                   (funcall key vector))))
+             (normalize (vector)
+               (map `(array ,*read-default-float-format* (*))
+                    (lambda (x) (/ x 255.0)) vector))
+             (matrix-maker (element-type key)
+               (lambda (vector)
+                 (make-array (list row col)
+                             :element-type element-type
+                             :displaced-to (funcall key vector)))))
+      (slurp:make-slurper stream
+                          (if normalize
+                              (if flatten
+                                  (slurper #'normalize)
+                                  (slurper
+                                    (matrix-maker *read-default-float-format*
+                                                  #'normalize)))
+                              (if flatten
+                                  (slurper #'identity)
+                                  (slurper
+                                    (matrix-maker '(unsigned-byte 8)
+                                                  #'identity))))))))
+
 (declaim
  (ftype (function
          (&key (:force boolean) (:normalize boolean) (:flatten boolean)
-          (:one-hot-label boolean))
+          (:one-hot-label boolean) (:slurp boolean))
          cons)
         load-mnist))
 
-(defun load-mnist (&key force normalize flatten one-hot-label)
+(defun load-mnist (&key force normalize flatten one-hot-label slurp)
   "Return plist as :train-labels :test-labels :train-images :test-images."
   (mapcan
     (lambda (pathname)
@@ -139,12 +186,16 @@
           (if (uiop:string-prefix-p "train" (pathname-name pathname))
               :train-labels
               :test-labels)
-          (load-labels pathname :one-hot one-hot-label)))
+          (if slurp
+              (label-slurper pathname :one-hot one-hot-label)
+              (load-labels pathname :one-hot one-hot-label))))
        ((search "images" (pathname-name pathname))
         (list
           (if (uiop:string-prefix-p "train" (pathname-name pathname))
               :train-images
               :test-images)
-          (load-images pathname :normalize normalize :flatten flatten)))
+          (if slurp
+              (image-slurper pathname :normalize normalize :flatten flatten)
+              (load-images pathname :normalize normalize :flatten flatten))))
        (t (error "Unknown file name: ~S" pathname))))
     (extracts (mnist-files force) force)))

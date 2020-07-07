@@ -5,13 +5,15 @@
   :license "MIT"
   :description "MNIST dataset preprocessor for Common Lisp."
   :version
-  "1.0.2"
+  "1.1.0"
   :depends-on
   (
    "dexador" ; http client.
    "chipz" ; Decompression gzip.
    "uiop" ; Utilities.
    "fast-io" ; file-io.
+   "nibbles" ; byte-io.
+   "slurp" ; Slurper.
    )
   :pathname
   "src/"
