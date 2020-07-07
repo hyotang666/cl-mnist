@@ -29,10 +29,10 @@
                        :if-exists :supersede)
         :collect pathname))
 
-(defun extract (gzip-pathname &optional (extract t))
+(defun extract (gzip-pathname &optional force)
   (let ((pathname
          (car (uiop:split-string gzip-pathname :separator "." :max 2))))
-    (when extract
+    (when (or force (not (probe-file pathname)))
       (with-open-file (in gzip-pathname :element-type '(unsigned-byte 8))
         (with-open-file (out pathname :direction :output
                          :element-type '(unsigned-byte 8)
@@ -41,8 +41,8 @@
           (chipz:decompress out :gzip in))))
     pathname))
 
-(defun extracts (pathnames &optional (extract t))
-  (mapcar (lambda (x) (extract x extract)) pathnames))
+(defun extracts (pathnames &optional force)
+  (mapcar (lambda (x) (extract x force)) pathnames))
 
 (defun load-labels (pathname &key one-hot force)
   (let (result size)
@@ -147,4 +147,4 @@
               :test-images)
           (load-images pathname :normalize normalize :flatten flatten)))
        (t (error "Unknown file name: ~S" pathname))))
-    (extracts (mnist-files force))))
+    (extracts (mnist-files force) force)))
