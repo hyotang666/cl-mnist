@@ -72,7 +72,7 @@
                   (dotimes (x size array)
                     (setf (aref array x (aref result x)) 1)))
                 result)
-            size 1)))
+            size 1 8)))
 
 (defun label-slurper (pathname &key one-hot)
   (let ((stream (open pathname :element-type '(unsigned-byte 8))))
@@ -88,7 +88,7 @@
                                     (setf (aref vector (read-byte stream)) 1)
                                     vector))
                                 'read-byte))
-        count 1))))
+        count 1 8))))
 
 (defun load-images (pathname &key normalize flatten force)
   (let (result size items row col)
@@ -139,7 +139,7 @@
                             (list row col)))
                   :displaced-to result
                   :element-type '(unsigned-byte 8)))
-            items size)))
+            items size 16)))
 
 (defun image-slurper (pathname &key normalize flatten)
   (let* ((stream (open pathname :element-type '(unsigned-byte 8)))
@@ -177,7 +177,7 @@
                                     (slurper
                                       (matrix-maker '(unsigned-byte 8)
                                                     #'identity)))))
-        count size))))
+        count size 16))))
 
 (declaim
  (ftype (function
@@ -186,16 +186,18 @@
          cons)
         load-mnist))
 
-(defun make-plist (pathname category data count size)
+(defun make-plist (pathname category data count size offset)
   (cond
    ((search "train" (pathname-name pathname))
     (list (read-from-string (format nil ":train-~A" category)) data
           (read-from-string (format nil ":train-~A-count" category)) count
-          (read-from-string (format nil ":train-~A-size" category)) size))
+          (read-from-string (format nil ":train-~A-size" category)) size
+          (read-from-string (format nil ":train-~A-offset" category)) offset))
    ((search "t10k" (pathname-name pathname))
     (list (read-from-string (format nil ":test-~A" category)) data
           (read-from-string (format nil ":test-~A-count" category)) count
-          (read-from-string (format nil ":test-~A-size" category)) size))
+          (read-from-string (format nil ":test-~A-size" category)) size
+          (read-from-string (format nil ":test-~A-offset" category)) offset))
    (t (error "Unknown pathname: ~S" pathname))))
 
 (defun load-mnist (&key force normalize flatten one-hot-label slurp)
